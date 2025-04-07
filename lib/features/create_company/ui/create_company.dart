@@ -39,9 +39,10 @@ class _CreateCompanyState extends State<CreateCompany> {
     final snapshot =
         await FirebaseFirestore.instance.collection('provinces').get();
     setState(() {
-      provinces = snapshot.docs
-          .map((doc) => ProvincesModel(id: doc.id, name: doc['name']))
-          .toList();
+      provinces =
+          snapshot.docs
+              .map((doc) => ProvincesModel(id: doc.id, name: doc['name']))
+              .toList();
     });
   }
 
@@ -49,16 +50,18 @@ class _CreateCompanyState extends State<CreateCompany> {
     if (_formKey.currentState!.validate() && selectedProvinceId != null) {
       final bloc = getIt<CompanyBloc>();
 
-      bloc.add(AddCompany(
-        CompanyModel(
-          id: nameController.text, 
-          name: nameController.text, 
-          description:descriptionController.text, 
-          provinceId: selectedProvinceId!,
-          linkedin:  linkedinController.text,
-          website: websiteController.text,
+      bloc.add(
+        AddCompany(
+          CompanyModel(
+            id: nameController.text,
+            name: nameController.text,
+            description: descriptionController.text,
+            provinceId: selectedProvinceId!,
+            linkedin: linkedinController.text,
+            website: websiteController.text,
+          ),
         ),
-      ));
+      );
     }
   }
 
@@ -71,9 +74,8 @@ class _CreateCompanyState extends State<CreateCompany> {
           if (state is CreateCompanyLoading) {
             showDialog(
               context: context,
-              builder: (context) => const Center(
-                child: CircularProgressIndicator(),
-              ),
+              builder:
+                  (context) => const Center(child: CircularProgressIndicator()),
             );
           }
           if (state is CreateCompanyError) {
@@ -90,7 +92,6 @@ class _CreateCompanyState extends State<CreateCompany> {
               type: ToastificationType.success,
             );
 
-            
             context.go(HomePage.router);
 
             nameController.clear();
@@ -99,12 +100,17 @@ class _CreateCompanyState extends State<CreateCompany> {
             linkedinController.clear();
             selectedProvinceId = null;
 
-            
             Navigator.pop(context);
           }
         },
         child: Scaffold(
-          appBar: AppBar(title: const Text('Agregar empresa')),
+          appBar: AppBar(
+            title: const Text('Agregar empresa'),
+            leading: IconButton(
+              onPressed: () => context.go(HomePage.router),
+              icon: Icon(Icons.arrow_back_ios_new_outlined),
+            ),
+          ),
           body: Padding(
             padding: const EdgeInsets.all(16),
             child: Form(
@@ -114,33 +120,36 @@ class _CreateCompanyState extends State<CreateCompany> {
                   DropdownButtonFormField<String>(
                     value: selectedProvinceId,
                     decoration: const InputDecoration(labelText: 'Provincia'),
-                    items: provinces.map((prov) {
-                      return DropdownMenuItem(
-                        value: prov.id,
-                        child: Text(prov.name),
-                      );
-                    }).toList(),
+                    items:
+                        provinces.map((prov) {
+                          return DropdownMenuItem(
+                            value: prov.id,
+                            child: Text(prov.name),
+                          );
+                        }).toList(),
                     onChanged: (value) {
                       setState(() {
                         selectedProvinceId = value;
                       });
                     },
-                    validator: (value) =>
-                        value == null ? 'Selecciona una provincia' : null,
+                    validator:
+                        (value) =>
+                            value == null ? 'Selecciona una provincia' : null,
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: nameController,
                     decoration: const InputDecoration(labelText: 'Nombre'),
-                    validator: (value) => value == null || value.isEmpty
-                        ? 'Completa el nombre'
-                        : null,
+                    validator:
+                        (value) =>
+                            value == null || value.isEmpty
+                                ? 'Completa el nombre'
+                                : null,
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: descriptionController,
-                    decoration:
-                        const InputDecoration(labelText: 'Descripción'),
+                    decoration: const InputDecoration(labelText: 'Descripción'),
                     maxLines: 3,
                   ),
                   const SizedBox(height: 16),
