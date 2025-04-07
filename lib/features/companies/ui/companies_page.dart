@@ -1,8 +1,11 @@
+import 'dart:ui';
+
 import 'package:company_wiki/core/locator.dart';
 import 'package:company_wiki/features/companies/ui/bloc/company_bloc.dart';
 import 'package:company_wiki/features/companies/ui/bloc/company_event.dart';
 
 import 'package:company_wiki/features/companies/ui/bloc/company_state.dart';
+import 'package:company_wiki/utils/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_social_button/flutter_social_button.dart';
@@ -74,64 +77,90 @@ class CompaniesView extends StatelessWidget {
                     horizontal: 12,
                     vertical: 6,
                   ),
-                  child: Card(
-                    shape: RoundedRectangleBorder(
+                  child: Container(
+                    decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.25),
+                          offset: const Offset(0, 8),
+                          blurRadius: 20,
+                          spreadRadius: 2,
+                        ),
+                      ],
                     ),
-                    elevation: 4,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            data['name'] ?? 'Sin nombre',
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
+                    child: ClipRect(
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(
+                          sigmaX: 90,
+                          sigmaY: 50,
+                        ), // Difuminado
+                        child: Card(
+                          color: AppColors.skySecondary.withAlpha(
+                            (0.9 * 255).toInt(),
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            data['description'] ?? '',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Colors.black54,
-                            ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
                           ),
-                          const SizedBox(height: 12),
-                          Row(
-                            children: [
-                              if (data['linkedin'] != null &&
-                                  data['linkedin'].toString().isNotEmpty)
-                                FlutterSocialButton(
-                                  iconSize: 30,
-                                  onTap: () {
-                                    launchUrl(Uri.parse(data['linkedin']));
-                                  },
-                                  mini: true,
-                                  buttonType: ButtonType.linkedin,
-                                  title: 'LinkedIn',
-                                ),
-                              if (data['web'] != null &&
-                                  data['web'].toString().isNotEmpty)
-                                RawMaterialButton(
-                                  onPressed: () {
-                                    launchUrl(Uri.parse(data['web']));
-                                  },
-                                  elevation: 2.0,
-                                  fillColor: Colors.teal,
-                                  padding: const EdgeInsets.all(12.0),
-                                  shape: const CircleBorder(),
-                                  child: const Icon(
-                                    Icons.public,
-                                    size: 30.0,
+                          elevation: 4,
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  data['name'] ?? 'Sin nombre',
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
                                     color: Colors.white,
                                   ),
                                 ),
-                            ],
+                                const SizedBox(height: 8),
+                                Text(
+                                  data['description'] ?? '',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    if (data['linkedin'] != null &&
+                                        data['linkedin'].toString().isNotEmpty)
+                                      IconButton(
+                                        icon: const FaIcon(
+                                          FontAwesomeIcons.linkedin,
+                                          size: 20,
+                                          color: Colors.white,
+                                        ),
+                                        onPressed: () {
+                                          launchUrl(
+                                            Uri.parse(data['linkedin']),
+                                          );
+                                        },
+                                      ),
+                                    if (data['website'] != null &&
+                                        data['website'].toString().isNotEmpty)
+                                        IconButton(
+                                        icon: const FaIcon(
+                                          FontAwesomeIcons.globe,
+                                          size: 20,
+                                          color: Colors.white,
+                                        ),
+                                        onPressed: () {
+                                          launchUrl(Uri.parse(data['website']));
+                                        },
+                                      ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
@@ -141,8 +170,7 @@ class CompaniesView extends StatelessWidget {
           } else if (state is CompanyError) {
             return Center(child: Text(state.message));
           }
-
-          return const SizedBox(); // Estado inicial
+          return const SizedBox();
         },
       ),
     );

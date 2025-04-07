@@ -47,14 +47,17 @@ class ProvincesView extends StatelessWidget {
               itemCount: provinces.length,
               itemBuilder: (context, index) {
                 final prov = provinces[index];
-                return ListTile(
-                  title: Text(prov['name']),
-                  onTap: () {
-                    context.push(
-                      CompaniesPage.router,
-                      extra: {'id': prov['id'], 'name': prov['name']},
-                    );
-                  },
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ListTile(
+                    title: Text(prov['name'], style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                    onTap: () {
+                      context.push(
+                        CompaniesPage.router,
+                        extra: {'id': prov['id'], 'name': prov['name']},
+                      );
+                    },
+                  ),
                 );
               },
             );
