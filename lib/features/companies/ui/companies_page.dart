@@ -89,13 +89,11 @@ class CompaniesView extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: ClipRect(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
                       child: BackdropFilter(
-                        filter: ImageFilter.blur(
-                          sigmaX: 90,
-                          sigmaY: 50,
-                        ), // Difuminado
-                        child: Card(
+                        filter: ImageFilter.blur(sigmaX: 90, sigmaY: 50),
+                        child: Material(
                           color: AppColors.skySecondary.withAlpha(
                             (0.9 * 255).toInt(),
                           ),
@@ -145,7 +143,7 @@ class CompaniesView extends StatelessWidget {
                                       ),
                                     if (data['website'] != null &&
                                         data['website'].toString().isNotEmpty)
-                                        IconButton(
+                                      IconButton(
                                         icon: const FaIcon(
                                           FontAwesomeIcons.globe,
                                           size: 20,

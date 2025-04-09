@@ -10,19 +10,21 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState> {
   }
 
   Future<void> _onLoadCompanies(
-      LoadCompanies event, Emitter<CompanyState> emit) async {
+    LoadCompanies event,
+    Emitter<CompanyState> emit,
+  ) async {
     emit(CompanyLoading());
 
     try {
-      final snapshot = await FirebaseFirestore.instance
-          .collection('provinces')
-          .doc(event.provinceId)
-          .collection('companies')
-          .get();
+      final snapshot =
+          await FirebaseFirestore.instance
+              .collection('provinces')
+              .doc(event.provinceId)
+              .collection('companies')
+              .get();
 
-      final companies = snapshot.docs
-          .map((doc) => {'id': doc.id, ...doc.data()})
-          .toList();
+      final companies =
+          snapshot.docs.map((doc) => {'id': doc.id, ...doc.data()}).toList();
 
       emit(CompanySuccess(companies));
     } catch (e) {
@@ -31,22 +33,22 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState> {
   }
 
   Future<void> _onAddCompany(
-  AddCompany event, Emitter<CompanyState> emit) async {
-  emit(CreateCompanyLoading());
-  try {
-    final docRef = await FirebaseFirestore.instance
-        .collection('provinces')
-        .doc(event.companyModel.provinceId)  
-        .collection('companies') 
-        .add(event.companyModel.toMap());
-    
-    event.companyModel.copyWith(id: docRef.id);
+    AddCompany event,
+    Emitter<CompanyState> emit,
+  ) async {
+    emit(CreateCompanyLoading());
+    try {
+      final docRef = await FirebaseFirestore.instance
+          .collection('provinces')
+          .doc(event.companyModel.provinceId)
+          .collection('companies')
+          .add(event.companyModel.toMap());
 
-    emit(CreateCompanySuccess()); 
-  } catch (e) {
-    emit(CompanyError('Error al agregar la empresa: $e'));
+      event.companyModel.copyWith(id: docRef.id);
+
+      emit(CreateCompanySuccess());
+    } catch (e) {
+      emit(CompanyError('Error al agregar la empresa: $e'));
+    }
   }
-}
-
-
 }

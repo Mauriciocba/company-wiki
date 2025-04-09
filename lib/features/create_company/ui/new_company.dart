@@ -2,8 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:company_wiki/core/locator.dart';
 import 'package:company_wiki/features/companies/ui/bloc/company_bloc.dart';
 import 'package:company_wiki/features/companies/ui/bloc/company_event.dart';
-import 'package:company_wiki/features/create_company/model/company_model.dart';
 import 'package:company_wiki/features/companies/ui/bloc/company_state.dart';
+import 'package:company_wiki/features/create_company/model/company_model.dart';
 import 'package:company_wiki/features/home_page/ui/home_page.dart';
 import 'package:company_wiki/features/provinces/models/pronvinces_model.dart';
 import 'package:flutter/material.dart';
@@ -11,19 +11,19 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:toastification/toastification.dart';
 
-class CreateCompany extends StatefulWidget {
+class NewCompanyPage extends StatefulWidget {
   static const router = '/create-company';
-  const CreateCompany({super.key});
+  const NewCompanyPage({super.key});
 
   @override
-  State<CreateCompany> createState() => _CreateCompanyState();
+  State<NewCompanyPage> createState() => _NewCompanyPageState();
 }
 
-class _CreateCompanyState extends State<CreateCompany> {
+class _NewCompanyPageState extends State<NewCompanyPage> {
   final _formKey = GlobalKey<FormState>();
   String? selectedProvinceId;
+  final bloc = getIt<CompanyBloc>();
   List<ProvincesModel> provinces = [];
-
   final TextEditingController nameController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController websiteController = TextEditingController();
@@ -46,72 +46,48 @@ class _CreateCompanyState extends State<CreateCompany> {
     });
   }
 
-  void _submit() {
-    if (_formKey.currentState!.validate() && selectedProvinceId != null) {
-      final bloc = getIt<CompanyBloc>();
-
-      bloc.add(
-        AddCompany(
-          CompanyModel(
-            id: nameController.text,
-            name: nameController.text,
-            description: descriptionController.text,
-            provinceId: selectedProvinceId!,
-            linkedin: linkedinController.text,
-            website: websiteController.text,
-          ),
-        ),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: getIt<CompanyBloc>(),
-      child: BlocListener<CompanyBloc, CompanyState>(
-        listener: (context, state) {
-          if (state is CreateCompanyLoading) {
-            showDialog(
-              context: context,
-              builder:
-                  (context) => const Center(child: CircularProgressIndicator()),
-            );
-          }
-          if (state is CreateCompanyError) {
-            toastification.show(
-              context: context,
-              title: const Text('Error al guardar'),
-              description: Text(state.message),
-              type: ToastificationType.error,
-            );
-          } else if (state is CreateCompanySuccess) {
-            toastification.show(
-              context: context,
-              title: const Text('Empresa guardada'),
-              type: ToastificationType.success,
-            );
-
-            context.go(HomePage.router);
-
-            nameController.clear();
-            descriptionController.clear();
-            websiteController.clear();
-            linkedinController.clear();
-            selectedProvinceId = null;
-
-            Navigator.pop(context);
-          }
-        },
-        child: Scaffold(
-          appBar: AppBar(
-            title: const Text('Agregar empresa'),
-            leading: IconButton(
-              onPressed: () => context.go(HomePage.router),
-              icon: Icon(Icons.arrow_back_ios_new_outlined),
-            ),
-          ),
-          body: Padding(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Agregar empresa'),
+        leading: IconButton(
+          onPressed: () => context.go(HomePage.router),
+          icon: Icon(Icons.arrow_back_ios_new_outlined),
+        ),
+      ),
+      body: BlocProvider.value(
+        value: bloc,
+        child: BlocListener<CompanyBloc, CompanyState>(
+          listener: (context, state) {
+            if (state is CreateCompanyLoading) {
+              showDialog(
+                context: context,
+                builder:
+                    (context) =>
+                        const Center(child: CircularProgressIndicator()),
+              );
+            }
+            if (state is CreateCompanyError) {
+              toastification.show(
+                context: context,
+                autoCloseDuration: Duration(seconds: 2),
+                title: const Text('Error al guardar'),
+                description: Text(state.message),
+                type: ToastificationType.error,
+              );
+            }
+            if (state is CreateCompanySuccess) {
+              toastification.show(
+                context: context,
+                autoCloseDuration: Duration(seconds: 2),
+                title: const Text('Empresa guardada'),
+                type: ToastificationType.success,
+              );
+              context.go(HomePage.router);
+            }
+          },
+          child: Padding(
             padding: const EdgeInsets.all(16),
             child: Form(
               key: _formKey,
@@ -164,13 +140,30 @@ class _CreateCompanyState extends State<CreateCompany> {
                   ),
                   const SizedBox(height: 24),
                   ElevatedButton(
-                    onPressed: _submit,
+                    onPressed: () {
+                      if (_formKey.currentState!.validate() &&
+                          selectedProvinceId != null) {
+                        bloc.add(
+                          AddCompany(
+                            CompanyModel(
+                              id: nameController.text,
+                              name: nameController.text,
+                              description: descriptionController.text,
+                              provinceId: selectedProvinceId!,
+                              linkedin: linkedinController.text,
+                              website: websiteController.text,
+                            ),
+                          ),
+                        );
+                      }
+                      //context.go(HomePage.router);
+                    },
                     child: const Text('Guardar'),
                   ),
                 ],
               ),
             ),
-          ),
+          ), // Use the NewCompanyForm widget
         ),
       ),
     );

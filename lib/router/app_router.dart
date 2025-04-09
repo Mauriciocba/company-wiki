@@ -1,8 +1,8 @@
+import 'package:company_wiki/features/create_company/ui/new_company.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/companies/ui/companies_page.dart';
-import '../features/create_company/ui/create_company.dart';
 import '../features/home_page/ui/home_page.dart';
 import '../features/provinces/ui/provinces.dart';
 
@@ -21,9 +21,9 @@ final GoRouter appRouter = GoRouter(
       ),
     ),
     GoRoute(
-      path: CreateCompany.router,
+      path: NewCompanyPage.router,
       pageBuilder: (context, state) => _buildPageWithTransition(
-        const CreateCompany(),
+        const NewCompanyPage(),
       ),
     ),
     GoRoute(

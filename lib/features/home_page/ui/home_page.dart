@@ -1,4 +1,4 @@
-import 'package:company_wiki/features/create_company/ui/create_company.dart';
+import 'package:company_wiki/features/create_company/ui/new_company.dart';
 import 'package:company_wiki/features/provinces/ui/provinces.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -44,7 +44,7 @@ class HomePage extends StatelessWidget {
 
   TextButton buildTextButtonCreateCompany(BuildContext context) {
     return TextButton(
-      onPressed: () => context.push(CreateCompany.router),
+      onPressed: () => context.push(NewCompanyPage.router),
       style: TextButton.styleFrom(
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
