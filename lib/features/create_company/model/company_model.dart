@@ -4,7 +4,9 @@ class CompanyModel {
   final String description;
   final String? linkedin;
   final String? website;
-  final String provinceId; 
+  final String provinceId;
+  final String? logoUrl;
+  final int? employees; 
 
   CompanyModel({
     this.id,
@@ -13,6 +15,8 @@ class CompanyModel {
     required this.provinceId,
     this.linkedin,
     this.website,
+    this.logoUrl,
+    this.employees,
   });
 
   // Constructor desde Firebase
@@ -24,6 +28,8 @@ class CompanyModel {
       provinceId: map['provinceId'] ?? '', 
       linkedin: map['linkedin'],
       website: map['website'],
+      logoUrl: map['logo'] ?? '',
+      employees: map['employees'] != null ? int.tryParse(map['employees'].toString()) : null,
     );
   }
 
@@ -35,6 +41,8 @@ class CompanyModel {
       'provinceId': provinceId,
       if (linkedin != null) 'linkedin': linkedin,
       if (website != null) 'website': website,
+      if (logoUrl != null) 'logo': logoUrl,
+      if (employees != null) 'employees': employees.toString(),
     };
   }
 
@@ -45,6 +53,8 @@ class CompanyModel {
     String? linkedin,
     String? website,
     String? provinceId,
+    String? logoUrl,
+    int? employees,
   }) {
     return CompanyModel(
       id: id ?? this.id,
@@ -53,6 +63,8 @@ class CompanyModel {
       provinceId: provinceId ?? this.provinceId,
       linkedin: linkedin ?? this.linkedin,
       website: website ?? this.website,
+      logoUrl: logoUrl ?? this.logoUrl,
+      employees: employees ?? this.employees,
     );
   }
 }

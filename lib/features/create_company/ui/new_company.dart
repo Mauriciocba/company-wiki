@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:company_wiki/core/locator.dart';
 import 'package:company_wiki/features/companies/ui/bloc/company_bloc.dart';
@@ -6,9 +8,12 @@ import 'package:company_wiki/features/companies/ui/bloc/company_state.dart';
 import 'package:company_wiki/features/create_company/model/company_model.dart';
 import 'package:company_wiki/features/home_page/ui/home_page.dart';
 import 'package:company_wiki/features/provinces/models/pronvinces_model.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:toastification/toastification.dart';
 
 class NewCompanyPage extends StatefulWidget {
@@ -20,6 +25,7 @@ class NewCompanyPage extends StatefulWidget {
 }
 
 class _NewCompanyPageState extends State<NewCompanyPage> {
+  File? _logoImage;
   final _formKey = GlobalKey<FormState>();
   String? selectedProvinceId;
   final bloc = getIt<CompanyBloc>();
@@ -28,11 +34,52 @@ class _NewCompanyPageState extends State<NewCompanyPage> {
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController websiteController = TextEditingController();
   final TextEditingController linkedinController = TextEditingController();
+  final TextEditingController employeesController = TextEditingController();
+  final TextEditingController logoController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _loadProvinces();
+  }
+
+  Future<void> _pickLogoImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        _logoImage = File(pickedFile.path);
+      });
+    } else {
+      Exception('No se seleccionó ninguna imagen');
+    }
+  }
+
+  Future<String?> _uploadLogoToFirebase(
+    String provinceId,
+    String companyId,
+  ) async {
+    if (_logoImage == null) {
+      Exception('No hay imagen seleccionada para subir.');
+      return null;
+    }
+
+    try {
+      final fileName = DateTime.now().millisecondsSinceEpoch.toString();
+
+      final ref = FirebaseStorage.instance.ref().child(
+        'provinces/$provinceId/companies/$companyId/logo/$fileName.jpg',
+      );
+
+      await ref.putFile(_logoImage!);
+      final downloadUrl = await ref.getDownloadURL();
+
+      return downloadUrl;
+    } on FirebaseException catch (e) {
+      Exception('Error al subir la imagen: ${e.message}');
+      return null;
+    }
   }
 
   Future<void> _loadProvinces() async {
@@ -116,6 +163,7 @@ class _NewCompanyPageState extends State<NewCompanyPage> {
                   TextFormField(
                     controller: nameController,
                     decoration: const InputDecoration(labelText: 'Nombre'),
+                    maxLength: 50,
                     validator:
                         (value) =>
                             value == null || value.isEmpty
@@ -127,6 +175,21 @@ class _NewCompanyPageState extends State<NewCompanyPage> {
                     controller: descriptionController,
                     decoration: const InputDecoration(labelText: 'Descripción'),
                     maxLines: 3,
+                    maxLength: 450
+                  ),
+                  TextFormField(
+                    controller: employeesController,
+                    decoration: const InputDecoration(
+                      labelText: 'Número de Empleados',
+                    ),
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Por favor, ingresa un número';
+                      }
+                      return null;
+                    },
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
@@ -138,20 +201,46 @@ class _NewCompanyPageState extends State<NewCompanyPage> {
                     controller: linkedinController,
                     decoration: const InputDecoration(labelText: 'LinkedIn'),
                   ),
+                  SizedBox(height: 16),
+                  Row(
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: _pickLogoImage,
+                        icon: Icon(Icons.image),
+                        label: Text('Seleccionar logo'),
+                      ),
+                      const SizedBox(width: 8),
+                      if (_logoImage != null) Text('Logo seleccionado'),
+                    ],
+                  ),
+
                   const SizedBox(height: 24),
                   ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       if (_formKey.currentState!.validate() &&
                           selectedProvinceId != null) {
+                        final companyId =
+                            FirebaseFirestore.instance
+                                .collection('companies')
+                                .doc()
+                                .id;
+                        final logoUrl = await _uploadLogoToFirebase(
+                          selectedProvinceId!,
+                          companyId,
+                        );
                         bloc.add(
                           AddCompany(
                             CompanyModel(
-                              id: nameController.text,
+                              id: companyId,
                               name: nameController.text,
                               description: descriptionController.text,
                               provinceId: selectedProvinceId!,
                               linkedin: linkedinController.text,
                               website: websiteController.text,
+                              logoUrl:
+                                  logoUrl ??
+                                  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRl3KRLQ-4_EdCiWdQ5WVmZBhS4HCHiTxV71A&s',
+                              employees: int.tryParse(employeesController.text),
                             ),
                           ),
                         );
