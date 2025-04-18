@@ -1,16 +1,17 @@
-# company_wiki
+# Company Wiki
 
-A new Flutter project.
+Proyecto desarrollado con Flutter.
 
-## Getting Started
+## Ver
 
-This project is a starting point for a Flutter application.
+[Enlace a la app]()
 
-A few resources to get you started if this is your first Flutter project:
+## Sobre el proyecto
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+**Company Wiki** es una aplicación móvil pensada para personas que están dando sus primeros pasos en el mundo de la tecnología.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+El objetivo del proyecto es brindar información sobre distintas empresas del rubro tecnológico, para que los usuarios puedan conocerlas, seguirlas en LinkedIn, visitar sus sitios web y entender mejor a qué se dedican. La app busca ser un recurso útil y accesible para quienes inician su camino en áreas como la programación, testing, diseño, entre otras ramas del sector tech.
+
+Este proyecto fue creado con fines prácticos y educativos, sin fines de lucro, con la intención de ayudar a la comunidad y compartir conocimiento.
+
+Desarrollado por **Mauricio Torres**.

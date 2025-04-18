@@ -1,3 +1,4 @@
+import 'package:company_wiki/features/create_company/ui/new_company.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -9,19 +10,29 @@ final GoRouter appRouter = GoRouter(
   routes: [
     GoRoute(
       path: HomePage.router,
-      builder: (context, state) => const HomePage(),
+      pageBuilder: (context, state) => _buildPageWithTransition(
+        const HomePage(),
+      ),
     ),
     GoRoute(
       path: ProvincesPage.router,
-      builder: (context, state) => const ProvincesPage(),
+      pageBuilder: (context, state) => _buildPageWithTransition(
+        const ProvincesPage(),
+      ),
+    ),
+    GoRoute(
+      path: NewCompanyPage.router,
+      pageBuilder: (context, state) => _buildPageWithTransition(
+        const NewCompanyPage(),
+      ),
     ),
     GoRoute(
       path: CompaniesPage.router,
       name: CompaniesPage.router,
       pageBuilder: (context, state) {
         final data = state.extra as Map<String, dynamic>;
-        return MaterialPage(
-          child: CompaniesPage(
+        return _buildPageWithTransition(
+          CompaniesPage(
             provinciaId: data['id'],
             provinciaName: data['name'],
           ),
@@ -30,3 +41,22 @@ final GoRouter appRouter = GoRouter(
     ),
   ],
 );
+
+CustomTransitionPage _buildPageWithTransition(Widget child) {
+  return CustomTransitionPage(
+    child: child,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      // Slide from right
+      final tween = Tween<Offset>(
+        begin: const Offset(1, 0),
+        end: Offset.zero,
+      ).chain(CurveTween(curve: Curves.easeInOut));
+
+      return SlideTransition(
+        position: animation.drive(tween),
+        child: child,
+      );
+    },
+    transitionDuration: const Duration(milliseconds: 300),
+  );
+}

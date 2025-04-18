@@ -15,3 +15,13 @@ class CompanyError extends CompanyState {
 
   CompanyError(this.message);
 }
+
+class CreateCompanyLoading extends CompanyState {}
+
+class CreateCompanySuccess extends CompanyState {}
+
+class CreateCompanyError extends CompanyState {
+  final String message;
+
+  CreateCompanyError(this.message);
+}

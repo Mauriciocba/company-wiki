@@ -8,6 +8,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_social_button/flutter_social_button.dart';
 
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+import 'package:toastification/toastification.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 
@@ -44,6 +46,16 @@ class CompaniesView extends StatelessWidget {
     required this.provinciaName,
   });
 
+  bool isValidUrl(String url) {
+    try {
+      final uri = Uri.parse(url);
+      return uri.isAbsolute &&
+          (uri.hasScheme && (uri.scheme == 'http' || uri.scheme == 'https'));
+    } catch (e) {
+      return false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -69,70 +81,148 @@ class CompaniesView extends StatelessWidget {
               itemCount: state.companies.length,
               itemBuilder: (context, index) {
                 final data = state.companies[index];
-                return Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
+                return Card(
+                  elevation: 3,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                  child: Card(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    elevation: 4,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            data['name'] ?? 'Sin nombre',
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            CircleAvatar(
+                              backgroundImage:
+                                  data['logo'] != null && data['logo'].toString().isNotEmpty
+                                      ? NetworkImage(data['logo'] as String)
+                                      : const AssetImage('assets/images/defaultLogo.png') as ImageProvider,
+                              radius: 24,
                             ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            data['description'] ?? '',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Colors.black54,
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                data['name'] ?? 'Sin nombre',
+                                style: Theme.of(context).textTheme.titleMedium
+                                    ?.copyWith(fontWeight: FontWeight.bold),
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 12),
-                          Row(
-                            children: [
-                              if (data['linkedin'] != null &&
-                                  data['linkedin'].toString().isNotEmpty)
-                                FlutterSocialButton(
-                                  iconSize: 30,
-                                  onTap: () {
-                                    launchUrl(Uri.parse(data['linkedin']));
-                                  },
-                                  mini: true,
-                                  buttonType: ButtonType.linkedin,
-                                  title: 'LinkedIn',
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          data['description'] ?? 'Sin descripción',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                        const SizedBox(height: 12),
+                        Divider(),
+                        const SizedBox(height: 8),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                IconButton(
+                                  icon: FaIcon(
+                                    FontAwesomeIcons.linkedin,
+                                    size: 20,
+                                    color:
+                                        data['linkedin'] != null &&
+                                                data['linkedin']
+                                                    .toString()
+                                                    .isNotEmpty
+                                            ? Colors.blueGrey
+                                            : Colors.grey.shade400,
+                                  ),
+                                  onPressed:
+                                      () => handleLinkedInTap(
+                                        data['linkedin']?.toString(),
+                                        context,
+                                      ),
                                 ),
-                              if (data['web'] != null &&
-                                  data['web'].toString().isNotEmpty)
-                                RawMaterialButton(
-                                  onPressed: () {
-                                    launchUrl(Uri.parse(data['web']));
-                                  },
-                                  elevation: 2.0,
-                                  fillColor: Colors.teal,
-                                  padding: const EdgeInsets.all(12.0),
-                                  shape: const CircleBorder(),
-                                  child: const Icon(
-                                    Icons.public,
-                                    size: 30.0,
-                                    color: Colors.white,
+                                GestureDetector(
+                                  onTap:
+                                      () => handleLinkedInTap(
+                                        data['linkedin']?.toString(),
+                                        context,
+                                      ),
+                                  child: Text(
+                                    'Ir a LinkedIn',
+                                    style: TextStyle(
+                                      color:
+                                          data['linkedin'] != null &&
+                                                  data['linkedin']
+                                                      .toString()
+                                                      .isNotEmpty
+                                              ? Colors.blue.shade900
+                                              : Colors.grey.shade400,
+                                      fontWeight: FontWeight.w500,
+                                    ),
                                   ),
                                 ),
-                            ],
-                          ),
-                        ],
-                      ),
+                              ],
+                            ),
+
+                            Row(
+                              children: [
+                                IconButton(
+                                  icon: FaIcon(
+                                    FontAwesomeIcons.globe,
+                                    size: 20,
+                                    color:
+                                        data['website'] != null &&
+                                                data['website']
+                                                    .toString()
+                                                    .isNotEmpty
+                                            ? Colors.blueGrey
+                                            : Colors.grey.shade400,
+                                  ),
+                                  onPressed:
+                                      () => handleWebsiteTap(
+                                        data['website']?.toString(),
+                                        context,
+                                      ),
+                                ),
+                                GestureDetector(
+                                  onTap:
+                                      () => handleWebsiteTap(
+                                        data['website']?.toString(),
+                                        context,
+                                      ),
+                                  child: Text(
+                                    'Ir al sitio web',
+                                    style: TextStyle(
+                                      color:
+                                          data['website'] != null &&
+                                                  data['website']
+                                                      .toString()
+                                                      .isNotEmpty
+                                              ? Colors.blue.shade900
+                                              : Colors.grey.shade400,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(Icons.person_add_alt_1),
+                            const SizedBox(width: 8),
+                            Text(
+                              '${data['employees'] != null ? NumberFormat.decimalPattern('es_AR').format(int.parse(data['employees'])) : 'Sin'} Empleados',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                 );
@@ -141,10 +231,43 @@ class CompaniesView extends StatelessWidget {
           } else if (state is CompanyError) {
             return Center(child: Text(state.message));
           }
-
-          return const SizedBox(); // Estado inicial
+          return const SizedBox();
         },
       ),
     );
+  }
+
+  void handleLinkedInTap(String? linkedinUrl, BuildContext context) {
+    if (linkedinUrl != null && linkedinUrl.isNotEmpty) {
+      if (isValidUrl(linkedinUrl)) {
+        launchUrl(Uri.parse(linkedinUrl));
+      } else {
+        toastification.show(
+          context: context,
+          title: Text('URL inválida'),
+          description: Text('El enlace de LinkedIn no es válido.'),
+          type: ToastificationType.error,
+          alignment: Alignment.topCenter,
+          autoCloseDuration: Duration(seconds: 3),
+        );
+      }
+    }
+  }
+
+  void handleWebsiteTap(String? website, BuildContext context) {
+    if (website != null && website.isNotEmpty) {
+      if (isValidUrl(website)) {
+        launchUrl(Uri.parse(website));
+      } else {
+        toastification.show(
+          context: context,
+          title: Text('URL inválida'),
+          description: Text('El enlace ingresado no es válido.'),
+          type: ToastificationType.error,
+          alignment: Alignment.topCenter,
+          autoCloseDuration: Duration(seconds: 3),
+        );
+      }
+    }
   }
 }
