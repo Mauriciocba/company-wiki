@@ -95,12 +95,9 @@ class CompaniesView extends StatelessWidget {
                           children: [
                             CircleAvatar(
                               backgroundImage:
-                                  data['logo'] != null
-                                      ? NetworkImage(data['logo'])
-                                      : const AssetImage(
-                                            'assets/images/logo.png',
-                                          )
-                                          as ImageProvider,
+                                  data['logo'] != null && data['logo'].toString().isNotEmpty
+                                      ? NetworkImage(data['logo'] as String)
+                                      : const AssetImage('assets/images/defaultLogo.png') as ImageProvider,
                               radius: 24,
                             ),
                             const SizedBox(width: 12),

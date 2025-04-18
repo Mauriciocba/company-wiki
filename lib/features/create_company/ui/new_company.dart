@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:company_wiki/core/locator.dart';
 import 'package:company_wiki/features/companies/ui/bloc/company_bloc.dart';
@@ -8,12 +6,10 @@ import 'package:company_wiki/features/companies/ui/bloc/company_state.dart';
 import 'package:company_wiki/features/create_company/model/company_model.dart';
 import 'package:company_wiki/features/home_page/ui/home_page.dart';
 import 'package:company_wiki/features/provinces/models/pronvinces_model.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:toastification/toastification.dart';
 
 class NewCompanyPage extends StatefulWidget {
@@ -25,7 +21,7 @@ class NewCompanyPage extends StatefulWidget {
 }
 
 class _NewCompanyPageState extends State<NewCompanyPage> {
-  File? _logoImage;
+  // File? _logoImage;
   final _formKey = GlobalKey<FormState>();
   String? selectedProvinceId;
   final bloc = getIt<CompanyBloc>();
@@ -43,44 +39,44 @@ class _NewCompanyPageState extends State<NewCompanyPage> {
     _loadProvinces();
   }
 
-  Future<void> _pickLogoImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+  // Future<void> _pickLogoImage() async {
+  //   final picker = ImagePicker();
+  //   final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
-    if (pickedFile != null) {
-      setState(() {
-        _logoImage = File(pickedFile.path);
-      });
-    } else {
-      Exception('No se seleccionó ninguna imagen');
-    }
-  }
+  //   if (pickedFile != null) {
+  //     setState(() {
+  //       _logoImage = File(pickedFile.path);
+  //     });
+  //   } else {
+  //     Exception('No se seleccionó ninguna imagen');
+  //   }
+  // }
 
-  Future<String?> _uploadLogoToFirebase(
-    String provinceId,
-    String companyId,
-  ) async {
-    if (_logoImage == null) {
-      Exception('No hay imagen seleccionada para subir.');
-      return null;
-    }
+  // Future<String?> _uploadLogoToFirebase(
+  //   String provinceId,
+  //   String companyId,
+  // ) async {
+  //   if (_logoImage == null) {
+  //     Exception('No hay imagen seleccionada para subir.');
+  //     return null;
+  //   }
 
-    try {
-      final fileName = DateTime.now().millisecondsSinceEpoch.toString();
+  //   try {
+  //     final fileName = DateTime.now().millisecondsSinceEpoch.toString();
 
-      final ref = FirebaseStorage.instance.ref().child(
-        'provinces/$provinceId/companies/$companyId/logo/$fileName.jpg',
-      );
+  //     final ref = FirebaseStorage.instance.ref().child(
+  //       'provinces/$provinceId/companies/$companyId/logo/$fileName.jpg',
+  //     );
 
-      await ref.putFile(_logoImage!);
-      final downloadUrl = await ref.getDownloadURL();
+  //     await ref.putFile(_logoImage!);
+  //     final downloadUrl = await ref.getDownloadURL();
 
-      return downloadUrl;
-    } on FirebaseException catch (e) {
-      Exception('Error al subir la imagen: ${e.message}');
-      return null;
-    }
-  }
+  //     return downloadUrl;
+  //   } on FirebaseException catch (e) {
+  //     Exception('Error al subir la imagen: ${e.message}');
+  //     return null;
+  //   }
+  // }
 
   Future<void> _loadProvinces() async {
     final snapshot =
@@ -202,44 +198,45 @@ class _NewCompanyPageState extends State<NewCompanyPage> {
                     decoration: const InputDecoration(labelText: 'LinkedIn'),
                   ),
                   SizedBox(height: 16),
-                  Row(
-                    children: [
-                      ElevatedButton.icon(
-                        onPressed: _pickLogoImage,
-                        icon: Icon(Icons.image),
-                        label: Text('Seleccionar logo'),
-                      ),
-                      const SizedBox(width: 8),
-                      if (_logoImage != null) Text('Logo seleccionado'),
-                    ],
+                  TextFormField(
+                    controller: logoController,
+                    decoration: const InputDecoration(labelText: 'Carga el url del logo'),
                   ),
+                  // Row(
+                  //   children: [
+                  //     ElevatedButton.icon(
+                  //       onPressed: _pickLogoImage,
+                  //       icon: Icon(Icons.image),
+                  //       label: Text('Seleccionar logo'),
+                  //     ),
+                  //     const SizedBox(width: 8),
+                  //     if (_logoImage != null) Text('Logo seleccionado'),
+                  //   ],
+                  // ),
 
                   const SizedBox(height: 24),
                   ElevatedButton(
                     onPressed: () async {
                       if (_formKey.currentState!.validate() &&
                           selectedProvinceId != null) {
-                        final companyId =
-                            FirebaseFirestore.instance
-                                .collection('companies')
-                                .doc()
-                                .id;
-                        final logoUrl = await _uploadLogoToFirebase(
-                          selectedProvinceId!,
-                          companyId,
-                        );
+                        // final companyId =
+                        //     FirebaseFirestore.instance
+                        //         .collection('companies')
+                        //         .doc()
+                        //         .id;
+                        // final logoUrl = await _uploadLogoToFirebase(
+                        //   selectedProvinceId!,
+                        //   companyId,
+                        // );
                         bloc.add(
                           AddCompany(
                             CompanyModel(
-                              id: companyId,
                               name: nameController.text,
                               description: descriptionController.text,
                               provinceId: selectedProvinceId!,
                               linkedin: linkedinController.text,
                               website: websiteController.text,
-                              logoUrl:
-                                  logoUrl ??
-                                  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRl3KRLQ-4_EdCiWdQ5WVmZBhS4HCHiTxV71A&s',
+                              logoUrl: logoController.text,
                               employees: int.tryParse(employeesController.text),
                             ),
                           ),
