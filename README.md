@@ -4,7 +4,7 @@ Proyecto desarrollado con Flutter.
 
 ## Ver
 
-[https://wiki-company-3gmtjnpev-mauriciocbas-projects.vercel.app/](VerDemo)
+https://wiki-company-3gmtjnpev-mauriciocbas-projects.vercel.app/  -- Ver demo
 
 ## Sobre el proyecto
 
